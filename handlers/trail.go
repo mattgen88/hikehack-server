@@ -20,7 +20,5 @@ func (h *Handler) TrailHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	w.Header().Add("content-type", "application/xml")
 	w.Write(trail)
 }
