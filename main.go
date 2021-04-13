@@ -45,6 +45,7 @@ func main() {
 
 	r.HandleFunc("/", h.RootHandler).Name("root")
 	r.HandleFunc("/trails", h.TrailsHandler).Name("trails")
+	r.HandleFunc("/trails/{name}", h.TrailHandler).Name("Trail")
 
 	r.NotFoundHandler = http.HandlerFunc(handlers.ErrorHandler)
 

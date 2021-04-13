@@ -20,7 +20,9 @@ func (h *Handler) TrailsHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	for _, trail := range trails {
-		root.Data[trail.Name()] = trail.Name()
+		name := trail.Name()[:len(trail.Name())-4]
+		root.AddLink("trail", &haljson.Link{Href: "/trails/" + name})
+		root.Data[name] = name
 	}
 
 	json, err := json.Marshal(root)
