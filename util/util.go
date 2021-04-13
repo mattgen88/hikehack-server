@@ -3,10 +3,10 @@ package util
 import "net/http"
 
 // ContentType sets the ContentType header to type
-func ContentType(next http.Handler, ctype string) http.Handler {
+func ContentType(h http.HandlerFunc, ctype string) http.HandlerFunc {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", ctype)
-		next.ServeHTTP(w, r)
+		h(w, r)
 	}
 	return http.HandlerFunc(fn)
 }

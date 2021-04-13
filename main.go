@@ -43,11 +43,11 @@ func main() {
 
 	h := handlers.New(r, db)
 
-	r.HandleFunc("/", h.RootHandler).Name("root")
-	r.HandleFunc("/trails", h.TrailsHandler).Name("trails")
-	r.HandleFunc("/trails/{name}", h.TrailHandler).Name("Trail")
+	r.HandleFunc("/", util.ContentType(h.RootHandler, "application/json")).Name("root")
+	r.HandleFunc("/trails", util.ContentType(h.TrailsHandler, "application/json")).Name("trails")
+	r.HandleFunc("/trails/{name}", util.ContentType(h.TrailHandler, "application/xml")).Name("Trail")
 
 	r.NotFoundHandler = http.HandlerFunc(handlers.ErrorHandler)
 
-	log.Fatal(http.ListenAndServe(net.JoinHostPort(host, port), util.ContentType(Gorilla.LoggingHandler(os.Stdout, Gorilla.CORS()(r)), "application/hal+json")))
+	log.Fatal(http.ListenAndServe(net.JoinHostPort(host, port), Gorilla.LoggingHandler(os.Stdout, Gorilla.CORS()(r))))
 }
