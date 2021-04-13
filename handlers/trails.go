@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/mattgen88/haljson"
 )
@@ -15,7 +15,7 @@ func (h *Handler) TrailsHandler(w http.ResponseWriter, r *http.Request) {
 
 	root.Self("/trails")
 
-	trails, err := os.ReadDir("trails")
+	trails, err := ioutil.ReadDir("trails")
 	if err != nil {
 		panic(err)
 	}

@@ -13,6 +13,10 @@ func (h *Handler) RootHandler(w http.ResponseWriter, r *http.Request) {
 	root := haljson.NewResource()
 
 	root.Self("/")
+
+	title := "Trail list"
+	root.AddLink("nav", &haljson.Link{Href: "/trails", Title: &title})
+
 	json, err := json.Marshal(root)
 	if err != nil {
 		log.Println(err)
