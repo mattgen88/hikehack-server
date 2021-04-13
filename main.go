@@ -12,8 +12,8 @@ import (
 
 	// registers with database/sql
 	_ "github.com/lib/pq"
-	"github.com/mattgen88/hikehack/server/handlers"
-	"github.com/mattgen88/hikehack/server/util"
+	"github.com/mattgen88/hikehack-server/handlers"
+	"github.com/mattgen88/hikehack-server/util"
 	"github.com/spf13/viper"
 )
 
@@ -21,15 +21,15 @@ func main() {
 	viper.AutomaticEnv()
 
 	// Gather configuration
-	viper.BindEnv("dsn")
-	dsn := viper.GetString("dsn")
+	viper.BindEnv("database_url")
+	dsn := viper.GetString("database_url")
 
 	viper.BindEnv("port")
 	viper.SetDefault("port", "8088")
 	port := viper.GetString("port")
 
 	viper.BindEnv("host")
-	viper.SetDefault("host", "127.0.0.1")
+	viper.SetDefault("host", "0.0.0.0")
 	host := viper.GetString("host")
 	log.Println("Starting on ", host, " port ", port, " dsn ", dsn)
 
