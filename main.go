@@ -31,7 +31,6 @@ func main() {
 	viper.BindEnv("host")
 	viper.SetDefault("host", "0.0.0.0")
 	host := viper.GetString("host")
-	log.Println("Starting on ", host, " port ", port, " dsn ", dsn)
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
