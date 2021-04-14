@@ -15,15 +15,17 @@ func (h *Handler) TrailsHandler(w http.ResponseWriter, r *http.Request) {
 
 	root.Self("/trails")
 
-	trails, err := ioutil.ReadDir("trails")
+	trails_files, err := ioutil.ReadDir("trails")
 	if err != nil {
 		panic(err)
 	}
-	for _, trail := range trails {
+	var trails []string
+	for _, trail := range trails_files {
 		name := trail.Name()[:len(trail.Name())-4]
-		root.AddLink("trail", &haljson.Link{Href: "/trails/" + name})
-		root.Data[name] = name
+		root.AddLink(name, &haljson.Link{Href: "/trails/" + name})
+		trails = append(trails, name)
 	}
+	root.Data["trails"] = trails
 
 	json, err := json.Marshal(root)
 	if err != nil {
