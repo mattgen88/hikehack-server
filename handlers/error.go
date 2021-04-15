@@ -8,8 +8,8 @@ import (
 	"github.com/mattgen88/haljson"
 )
 
-// ErrorHandler handles requests for users
-func ErrorHandler(w http.ResponseWriter, r *http.Request) {
+// Error handles requests for users
+func Error(w http.ResponseWriter, r *http.Request) {
 	root := haljson.NewResource()
 	root.Self(r.URL.Path)
 	root.Data["message"] = "Resource not found"

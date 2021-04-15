@@ -8,8 +8,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// RootHandler handles requests for the root of the API
-func (h *Handler) TrailHandler(w http.ResponseWriter, r *http.Request) {
+// GetTrail handles requests for the root of the API
+func (h *Handler) GetTrail(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
 

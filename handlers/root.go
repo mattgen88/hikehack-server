@@ -8,8 +8,8 @@ import (
 	"github.com/mattgen88/haljson"
 )
 
-// RootHandler handles requests for the root of the API
-func (h *Handler) RootHandler(w http.ResponseWriter, r *http.Request) {
+// Root handles requests for the root of the API
+func (h *Handler) GetRoot(w http.ResponseWriter, r *http.Request) {
 	root := haljson.NewResource()
 
 	root.Self("/")

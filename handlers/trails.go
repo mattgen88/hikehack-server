@@ -9,8 +9,8 @@ import (
 	"github.com/mattgen88/haljson"
 )
 
-// RootHandler handles requests for the root of the API
-func (h *Handler) TrailsHandler(w http.ResponseWriter, r *http.Request) {
+// GetTrails handles retrieving a list of trails
+func (h *Handler) GetTrails(w http.ResponseWriter, r *http.Request) {
 	root := haljson.NewResource()
 
 	root.Self("/trails")
@@ -26,6 +26,20 @@ func (h *Handler) TrailsHandler(w http.ResponseWriter, r *http.Request) {
 		trails = append(trails, name)
 	}
 	root.Data["trails"] = trails
+
+	json, err := json.Marshal(root)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	w.Write(json)
+}
+
+// CreateTrail handles requests to create a trail
+func (h *Handler) CreateTrail(w http.ResponseWriter, r *http.Request) {
+	root := haljson.NewResource()
+
+	root.Self("/trails")
 
 	json, err := json.Marshal(root)
 	if err != nil {

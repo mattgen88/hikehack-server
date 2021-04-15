@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net"
 	"net/http"
@@ -9,10 +8,14 @@ import (
 
 	Gorilla "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
 	// registers with database/sql
 	_ "github.com/lib/pq"
 	"github.com/mattgen88/hikehack-server/handlers"
+	"github.com/mattgen88/hikehack-server/middleware"
+	"github.com/mattgen88/hikehack-server/models"
 	"github.com/mattgen88/hikehack-server/util"
 	"github.com/spf13/viper"
 )
@@ -32,22 +35,56 @@ func main() {
 	viper.SetDefault("host", "0.0.0.0")
 	host := viper.GetString("host")
 
-	db, err := sql.Open("postgres", dsn)
+	viper.BindEnv("jwtKey")
+	jwtKey := viper.GetString("jwtKey")
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer db.Close()
+	db.AutoMigrate(&models.User{}, &models.Trails{})
+
+	dbh, _ := db.DB()
+	defer dbh.Close()
 
 	r := mux.NewRouter()
 
-	h := handlers.New(r, db)
+	h := handlers.New(r, jwtKey, db)
 
-	r.HandleFunc("/", util.ContentType(h.RootHandler, "application/json")).Name("root")
-	r.HandleFunc("/trails", util.ContentType(h.TrailsHandler, "application/json")).Name("trails")
-	r.HandleFunc("/trails/{name}", util.ContentType(h.TrailHandler, "application/xml")).Name("Trail")
+	r.Handle(
+		"/",
+		Gorilla.MethodHandler{
+			"GET": util.ContentType(h.GetRoot, "application/hal+json"),
+		}).
+		Name("root")
+	r.Handle(
+		"/trails",
+		Gorilla.MethodHandler{
+			"GET":  util.ContentType(h.GetTrails, "application/hal+json"),
+			"POST": middleware.AuthMiddleware(util.ContentType(h.CreateTrail, "application/hal+json"), jwtKey, db),
+		}).
+		Name("trails")
+	r.Handle(
+		"/trails/{name}",
+		Gorilla.MethodHandler{
+			"GET": util.ContentType(h.GetTrail, "application/xml"),
+		}).
+		Name("Trail")
+	r.Handle(
+		"/auth",
+		Gorilla.MethodHandler{
+			"POST": util.ContentType(h.Auth, "application/hal+json"),
+		}).
+		Name("Auth")
+	r.Handle(
+		"/auth/refresh",
+		Gorilla.MethodHandler{
+			"POST": util.ContentType(h.AuthRefresh, "application/hal+json"),
+		}).
+		Name("AuthRefresh")
 
-	r.NotFoundHandler = http.HandlerFunc(handlers.ErrorHandler)
+	r.NotFoundHandler = http.HandlerFunc(handlers.Error)
 
 	log.Fatal(http.ListenAndServe(net.JoinHostPort(host, port), Gorilla.LoggingHandler(os.Stdout, Gorilla.CORS()(r))))
 }
