@@ -177,6 +177,7 @@ func CreateJwt(name string, expire time.Time, claims jwt.Claims, jwtKey string) 
 		Secure:   true,
 		HttpOnly: true,
 		Expires:  expire,
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	return &cookie, nil
