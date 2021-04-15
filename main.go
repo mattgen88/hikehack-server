@@ -52,9 +52,8 @@ func main() {
 
 	h := handlers.New(r, jwtKey, db)
 	cors := Gorilla.CORS(
-		Gorilla.AllowedMethods([]string{"*"}),
-		Gorilla.AllowedOrigins([]string{"*"}),
-		Gorilla.AllowedHeaders([]string{"*"}),
+		Gorilla.AllowedMethods([]string{"GET", "POST", "OPTIONS"}),
+		Gorilla.AllowedOrigins([]string{"http://localhost:8080", "https://hikehack.netlify.app"}),
 		Gorilla.AllowCredentials())
 
 	r.Handle(
