@@ -92,5 +92,5 @@ func main() {
 
 	r.NotFoundHandler = http.HandlerFunc(handlers.Error)
 
-	log.Fatal(http.ListenAndServe(net.JoinHostPort(host, port), Gorilla.LoggingHandler(os.Stdout, Gorilla.CORS()(r))))
+	log.Fatal(http.ListenAndServe(net.JoinHostPort(host, port), Gorilla.LoggingHandler(os.Stdout, Gorilla.CORS(Gorilla.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}), Gorilla.AllowedOrigins([]string{"https://hikehack.netlify.app", "http://localhost:8080"}), Gorilla.AllowCredentials())(r))))
 }
