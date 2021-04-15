@@ -65,8 +65,9 @@ func AuthMiddleware(handler http.Handler, jwtKey string, db *gorm.DB) http.Handl
 									Issuer:    "test",
 								},
 							}
+							token := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
 
-							ctx = context.WithValue(ctx, UserDataKey("user_data"), accessClaims)
+							ctx = context.WithValue(ctx, UserDataKey("user_data"), token.Claims.(jwt.MapClaims))
 
 							accessCookie, accessErr := CreateJwt("access.jwt", accessExpires, &accessClaims, jwtKey)
 							if accessErr != nil {
