@@ -1,6 +1,12 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"bytes"
+	"compress/gzip"
+	"io"
+
+	"gorm.io/gorm"
+)
 
 type Trails struct {
 	gorm.Model
@@ -8,5 +14,21 @@ type Trails struct {
 	OwnerID int
 	Name    string
 	Title   string
-	GPX     string
+	GPX     []byte
+}
+
+func (t *Trails) SetGPX(gpx *bytes.Buffer) {
+	var buf bytes.Buffer
+	writer := gzip.NewWriter(&buf)
+	writer.Write(gpx.Bytes())
+	writer.Flush()
+	t.GPX = buf.Bytes()
+}
+
+func (t *Trails) GetGPX() *bytes.Buffer {
+	var decompressed bytes.Buffer
+	zr, _ := gzip.NewReader(bytes.NewBuffer(t.GPX))
+	io.Copy(&decompressed, zr)
+	zr.Close()
+	return &decompressed
 }

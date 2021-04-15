@@ -66,9 +66,9 @@ func main() {
 		}).
 		Name("trails")
 	r.Handle(
-		"/trails/{name}",
+		"/trails/{id}",
 		Gorilla.MethodHandler{
-			"GET": util.ContentType(h.GetTrail, "application/xml"),
+			"GET": util.ContentType(h.GetTrail, "application/gpx+xml"),
 		}).
 		Name("Trail")
 	r.Handle(

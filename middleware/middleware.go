@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/mattgen88/haljson"
 	"github.com/mattgen88/hikehack-server/models"
@@ -36,6 +35,7 @@ func AuthMiddleware(handler http.Handler, jwtKey string, db *gorm.DB) http.Handl
 		// Snag JWT, verify, validate or redirect to auth endpoint
 		cookie, err := r.Cookie("access.jwt")
 		if err != nil {
+			log.Println(err)
 			success = false
 		} else {
 			success, ctx = validateToken(ctx, cookie, jwtKey)
@@ -53,7 +53,6 @@ func AuthMiddleware(handler http.Handler, jwtKey string, db *gorm.DB) http.Handl
 					log.Println("refresh.jwt validated, updating access.jwt")
 					if val := ctx.Value(UserDataKey("user_data")); val != nil {
 						mapClaims := val.(jwt.MapClaims)
-						spew.Dump(mapClaims)
 						if username, ok := mapClaims["Username"]; ok {
 
 							user := &models.User{}
@@ -79,6 +78,7 @@ func AuthMiddleware(handler http.Handler, jwtKey string, db *gorm.DB) http.Handl
 								token := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
 
 								ctx = context.WithValue(ctx, UserDataKey("user_data"), token.Claims.(Claims))
+								ctx = context.WithValue(ctx, UserDataKey("user"), *user)
 
 								accessCookie, accessErr := CreateJwt("access.jwt", accessExpires, &accessClaims, jwtKey)
 								if accessErr != nil {
@@ -135,18 +135,22 @@ func validateToken(ctx context.Context, cookie *http.Cookie, jwtKey string) (boo
 	})
 
 	if err != nil {
+		log.Println(err)
 		success = false
 	}
 
 	if !token.Valid {
+		log.Println("not valid")
 		success = false
 	}
 
 	if _, ok := err.(*jwt.ValidationError); ok {
+		log.Println("validation error")
 		success = false
 	}
 
 	if _, ok := token.Claims.(jwt.MapClaims); !ok {
+		log.Println("bad claims")
 		success = false
 	}
 
