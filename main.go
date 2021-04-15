@@ -99,7 +99,7 @@ func main() {
 				os.Stdout,
 				Gorilla.CORS(
 					Gorilla.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-					Gorilla.AllowedOrigins([]string{"https://hikehack.netlify.app", "http://localhost:8080"}),
+					Gorilla.AllowedOrigins([]string{"https://hikehack.netlify.app", "https://hikehack.netlify.app/", "http://localhost:8080", "http://localhost:8080"}),
 					Gorilla.AllowedHeaders([]string{"X-Requested-With", "Content-Type"}),
 					Gorilla.AllowCredentials())(r))))
 }
