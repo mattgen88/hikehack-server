@@ -13,7 +13,7 @@ import (
 func (h *Handler) GetTrails(w http.ResponseWriter, r *http.Request) {
 	root := haljson.NewResource()
 
-	root.Self("/trails")
+	root.Self(r.URL.Path)
 
 	trails_files, err := ioutil.ReadDir("trails")
 	if err != nil {
@@ -26,20 +26,6 @@ func (h *Handler) GetTrails(w http.ResponseWriter, r *http.Request) {
 		trails = append(trails, name)
 	}
 	root.Data["trails"] = trails
-
-	json, err := json.Marshal(root)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	w.Write(json)
-}
-
-// CreateTrail handles requests to create a trail
-func (h *Handler) CreateTrail(w http.ResponseWriter, r *http.Request) {
-	root := haljson.NewResource()
-
-	root.Self("/trails")
 
 	json, err := json.Marshal(root)
 	if err != nil {

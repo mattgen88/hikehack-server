@@ -12,7 +12,7 @@ import (
 func (h *Handler) GetRoot(w http.ResponseWriter, r *http.Request) {
 	root := haljson.NewResource()
 
-	root.Self("/")
+	root.Self(r.URL.Path)
 
 	title := "Trail list"
 	root.AddLink("nav", &haljson.Link{Href: "/trails", Title: &title})

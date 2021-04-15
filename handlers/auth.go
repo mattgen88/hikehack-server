@@ -126,3 +126,77 @@ func (h *Handler) AuthRefresh(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(json)
 }
+
+// Register to register the user
+func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
+	root := haljson.NewResource()
+	root.Self(r.URL.Path)
+
+	if r.FormValue("username") == "" ||
+		r.FormValue("password") == "" ||
+		r.FormValue("email") == "" {
+
+		root.Data["required_fields"] = []string{"username", "password"}
+		root.Data["error"] = "Missing required fields."
+		root.Data["result"] = false
+
+		json, marshalErr := json.Marshal(root)
+		if marshalErr != nil {
+			log.Println(marshalErr)
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(json)
+		return
+	}
+
+	// Get user by username
+	user := &models.User{}
+
+	h.db.Where("username = ? or email = ?", r.FormValue("username"), r.FormValue("email")).First(user)
+
+	if user.ID != 0 {
+		root.Data["error"] = "Please try again."
+		root.Data["result"] = false
+
+		json, marshalErr := json.Marshal(root)
+		if marshalErr != nil {
+			log.Println(marshalErr)
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(json)
+		return
+	}
+	err := user.SetPassword(r.FormValue("password"))
+	if err != nil {
+		// something went terribly wrong
+		root.Data["error"] = "Something went wrong. Please try again."
+		root.Data["result"] = false
+
+		json, marshalErr := json.Marshal(root)
+		if marshalErr != nil {
+			log.Println(marshalErr)
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(json)
+		return
+	}
+	user.Username = r.FormValue("username")
+	user.Email = r.FormValue("email")
+	user.Realname = r.FormValue("realname")
+
+	h.db.Create(user)
+
+	root.Data["result"] = true
+	root.Data["message"] = "You can now log in with the supplied username and password"
+	json, marshalErr := json.Marshal(root)
+	if marshalErr != nil {
+		log.Println(marshalErr)
+		return
+	}
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write(json)
+
+}

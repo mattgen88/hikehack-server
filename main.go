@@ -83,6 +83,12 @@ func main() {
 			"POST": util.ContentType(h.AuthRefresh, "application/hal+json"),
 		}).
 		Name("AuthRefresh")
+	r.Handle(
+		"/auth/register",
+		Gorilla.MethodHandler{
+			"POST": util.ContentType(h.Register, "application/hal+json"),
+		}).
+		Name("Register")
 
 	r.NotFoundHandler = http.HandlerFunc(handlers.Error)
 
