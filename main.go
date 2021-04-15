@@ -59,40 +59,40 @@ func main() {
 
 	r.Handle(
 		"/",
-		cors(Gorilla.MethodHandler{
+		Gorilla.MethodHandler{
 			"GET": util.ContentType(h.GetRoot, "application/hal+json"),
-		})).
+		}).
 		Name("root")
 	r.Handle(
 		"/trails",
-		cors(Gorilla.MethodHandler{
+		Gorilla.MethodHandler{
 			"GET":  util.ContentType(h.GetTrails, "application/hal+json"),
 			"POST": middleware.AuthMiddleware(util.ContentType(h.CreateTrail, "application/hal+json"), jwtKey, db),
-		})).
+		}).
 		Name("trails")
 	r.Handle(
 		"/trails/{id}",
-		cors(Gorilla.MethodHandler{
+		Gorilla.MethodHandler{
 			"GET": util.ContentType(h.GetTrail, "application/gpx+xml"),
-		})).
+		}).
 		Name("Trail")
 	r.Handle(
 		"/auth",
-		cors(Gorilla.MethodHandler{
+		Gorilla.MethodHandler{
 			"POST": util.ContentType(h.Auth, "application/hal+json"),
-		})).
+		}).
 		Name("Auth")
 	r.Handle(
 		"/auth/refresh",
-		cors(Gorilla.MethodHandler{
+		Gorilla.MethodHandler{
 			"POST": util.ContentType(h.AuthRefresh, "application/hal+json"),
-		})).
+		}).
 		Name("AuthRefresh")
 	r.Handle(
 		"/auth/register",
-		cors(Gorilla.MethodHandler{
+		Gorilla.MethodHandler{
 			"POST": util.ContentType(h.Register, "application/hal+json"),
-		})).
+		}).
 		Name("Register")
 
 	r.NotFoundHandler = http.HandlerFunc(handlers.Error)
@@ -102,5 +102,5 @@ func main() {
 			net.JoinHostPort(host, port),
 			Gorilla.LoggingHandler(
 				os.Stdout,
-				r)))
+				cors(r))))
 }
