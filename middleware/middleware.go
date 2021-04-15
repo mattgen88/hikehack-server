@@ -10,7 +10,6 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/mattgen88/haljson"
-	"github.com/mattgen88/hikehack-server/models"
 	"gorm.io/gorm"
 )
 
@@ -54,38 +53,27 @@ func AuthMiddleware(handler http.Handler, jwtKey string, db *gorm.DB) http.Handl
 					if val := ctx.Value(UserDataKey("user_data")); val != nil {
 						mapClaims := val.(jwt.MapClaims)
 						if username, ok := mapClaims["Username"]; ok {
+							now := time.Now()
 
-							user := &models.User{}
+							accessExpires := now.Add(time.Minute * 5)
 
-							db.Where("username = ?", username).First(user)
+							// Create the Claims
+							accessClaims := Claims{
+								username.(string),
+								jwt.StandardClaims{
+									ExpiresAt: accessExpires.Unix(),
+									Issuer:    "test",
+								},
+							}
 
-							if user.ID == 0 {
-								log.Println(err)
+							ctx = context.WithValue(ctx, UserDataKey("user_data"), accessClaims)
+
+							accessCookie, accessErr := CreateJwt("access.jwt", accessExpires, &accessClaims, jwtKey)
+							if accessErr != nil {
+								log.Println(accessErr)
 								success = false
 							} else {
-								now := time.Now()
-
-								accessExpires := now.Add(time.Minute * 5)
-
-								// Create the Claims
-								accessClaims := Claims{
-									user.Username,
-									jwt.StandardClaims{
-										ExpiresAt: accessExpires.Unix(),
-										Issuer:    "test",
-									},
-								}
-
-								ctx = context.WithValue(ctx, UserDataKey("user_data"), accessClaims)
-								ctx = context.WithValue(ctx, UserDataKey("user"), *user)
-
-								accessCookie, accessErr := CreateJwt("access.jwt", accessExpires, &accessClaims, jwtKey)
-								if accessErr != nil {
-									log.Println(accessErr)
-									success = false
-								} else {
-									http.SetCookie(w, accessCookie)
-								}
+								http.SetCookie(w, accessCookie)
 							}
 						} else {
 							log.Println("No username")
@@ -153,7 +141,7 @@ func validateToken(ctx context.Context, cookie *http.Cookie, jwtKey string) (boo
 		success = false
 	}
 
-	ctx = context.WithValue(ctx, UserDataKey("user_data"), token.Claims.(Claims))
+	ctx = context.WithValue(ctx, UserDataKey("user_data"), token.Claims.(jwt.MapClaims))
 
 	return success, ctx
 }
