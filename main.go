@@ -51,43 +51,48 @@ func main() {
 	r := mux.NewRouter()
 
 	h := handlers.New(r, jwtKey, db)
+	cors := Gorilla.CORS(
+		Gorilla.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+		Gorilla.AllowedOrigins([]string{"https://hikehack.netlify.app", "https://hikehack.netlify.app/", "http://localhost:8080", "http://localhost:8080"}),
+		Gorilla.AllowedHeaders([]string{"X-Requested-With", "Content-Type"}),
+		Gorilla.AllowCredentials())
 
 	r.Handle(
 		"/",
-		Gorilla.MethodHandler{
+		cors(Gorilla.MethodHandler{
 			"GET": util.ContentType(h.GetRoot, "application/hal+json"),
-		}).
+		})).
 		Name("root")
 	r.Handle(
 		"/trails",
-		Gorilla.MethodHandler{
+		cors(Gorilla.MethodHandler{
 			"GET":  util.ContentType(h.GetTrails, "application/hal+json"),
 			"POST": middleware.AuthMiddleware(util.ContentType(h.CreateTrail, "application/hal+json"), jwtKey, db),
-		}).
+		})).
 		Name("trails")
 	r.Handle(
 		"/trails/{id}",
-		Gorilla.MethodHandler{
+		cors(Gorilla.MethodHandler{
 			"GET": util.ContentType(h.GetTrail, "application/gpx+xml"),
-		}).
+		})).
 		Name("Trail")
 	r.Handle(
 		"/auth",
-		Gorilla.MethodHandler{
+		cors(Gorilla.MethodHandler{
 			"POST": util.ContentType(h.Auth, "application/hal+json"),
-		}).
+		})).
 		Name("Auth")
 	r.Handle(
 		"/auth/refresh",
-		Gorilla.MethodHandler{
+		cors(Gorilla.MethodHandler{
 			"POST": util.ContentType(h.AuthRefresh, "application/hal+json"),
-		}).
+		})).
 		Name("AuthRefresh")
 	r.Handle(
 		"/auth/register",
-		Gorilla.MethodHandler{
+		cors(Gorilla.MethodHandler{
 			"POST": util.ContentType(h.Register, "application/hal+json"),
-		}).
+		})).
 		Name("Register")
 
 	r.NotFoundHandler = http.HandlerFunc(handlers.Error)
@@ -97,9 +102,5 @@ func main() {
 			net.JoinHostPort(host, port),
 			Gorilla.LoggingHandler(
 				os.Stdout,
-				Gorilla.CORS(
-					Gorilla.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-					Gorilla.AllowedOrigins([]string{"https://hikehack.netlify.app", "https://hikehack.netlify.app/", "http://localhost:8080", "http://localhost:8080"}),
-					Gorilla.AllowedHeaders([]string{"X-Requested-With", "Content-Type"}),
-					Gorilla.AllowCredentials())(r))))
+				r)))
 }
