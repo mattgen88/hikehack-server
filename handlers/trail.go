@@ -88,7 +88,8 @@ func (h *Handler) CreateTrail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spew.Dump(h.db.Create(&trail))
+	tx := h.db.Create(&trail)
+	spew.Dump(tx.Error)
 
 	json, err := json.Marshal(root)
 	if err != nil {
