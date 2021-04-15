@@ -100,6 +100,6 @@ func main() {
 				Gorilla.CORS(
 					Gorilla.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
 					Gorilla.AllowedOrigins([]string{"https://hikehack.netlify.app", "http://localhost:8080"}),
-					Gorilla.AllowedHeaders([]string{"X-Requested-With"}),
+					Gorilla.AllowedHeaders([]string{"X-Requested-With", "Content-Type"}),
 					Gorilla.AllowCredentials())(r))))
 }
