@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"github.com/mattgen88/haljson"
 	"github.com/mattgen88/hikehack-server/middleware"
@@ -35,11 +36,11 @@ func (h *Handler) CreateTrail(w http.ResponseWriter, r *http.Request) {
 
 	root.Self(r.URL.Path)
 
-	user_claims := (r.Context().Value(middleware.UserDataKey("user_data"))).(middleware.Claims)
+	user_claims := (r.Context().Value(middleware.UserDataKey("user_data"))).(jwt.MapClaims)
 	spew.Dump(user_claims)
 	user := &models.User{}
 
-	h.db.Where("username = ?", user_claims.Username).First(user)
+	h.db.Where("username = ?", user_claims["Username"]).First(user)
 
 	trail := models.Trails{}
 
