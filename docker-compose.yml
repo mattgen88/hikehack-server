@@ -1,0 +1,15 @@
+version: "3.1"
+
+services:
+  db:
+    image: postgres:alpine
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=hikehack
+      - POSTGRES_USER=hikehack
+      - POSTGRES_DB=hikehack
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
+
