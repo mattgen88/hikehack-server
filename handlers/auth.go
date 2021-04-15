@@ -196,7 +196,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		log.Println(marshalErr)
 		return
 	}
-	w.WriteHeader(http.StatusInternalServerError)
+	w.WriteHeader(http.StatusOK)
 	w.Write(json)
 
 }
