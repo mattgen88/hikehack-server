@@ -154,7 +154,7 @@ func validateToken(ctx context.Context, cookie *http.Cookie, jwtKey string) (boo
 		success = false
 	}
 
-	ctx = context.WithValue(ctx, UserDataKey("user_data"), token.Claims.(jwt.MapClaims))
+	ctx = context.WithValue(ctx, UserDataKey("user_data"), token.Claims.(Claims))
 
 	return success, ctx
 }
