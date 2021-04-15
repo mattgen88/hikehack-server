@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/mattgen88/haljson"
+	"github.com/mattgen88/hikehack-server/models"
 )
 
 // GetTrails handles retrieving a list of trails
@@ -15,17 +16,22 @@ func (h *Handler) GetTrails(w http.ResponseWriter, r *http.Request) {
 
 	root.Self(r.URL.Path)
 
-	trails_files, err := ioutil.ReadDir("trails")
-	if err != nil {
-		panic(err)
+	trails := []models.Trails{}
+	h.db.Select("id", "name").Find(&trails)
+	root.Data["trails"] = []struct{}{}
+
+	var trail_list = []struct {
+		Name string
+		ID   uint
+	}{}
+	for _, trail := range trails {
+		root.AddLink(fmt.Sprintf("%d", trail.ID), &haljson.Link{Href: fmt.Sprintf("/trails/%d", trail.ID)})
+		trail_list = append(trail_list, struct {
+			Name string
+			ID   uint
+		}{Name: trail.Name, ID: trail.ID})
 	}
-	var trails []string
-	for _, trail := range trails_files {
-		name := trail.Name()[:len(trail.Name())-4]
-		root.AddLink(name, &haljson.Link{Href: "/trails/" + name})
-		trails = append(trails, name)
-	}
-	root.Data["trails"] = trails
+	root.Data["trails"] = trail_list
 
 	json, err := json.Marshal(root)
 	if err != nil {
