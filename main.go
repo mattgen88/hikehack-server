@@ -51,11 +51,10 @@ func main() {
 	r := mux.NewRouter()
 
 	h := handlers.New(r, jwtKey, db)
-	cors := Gorilla.CORS(
-		Gorilla.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-		Gorilla.AllowedOrigins([]string{"*"}),
-		Gorilla.AllowedHeaders([]string{"X-Requested-With", "Content-Type"}),
-		Gorilla.AllowCredentials())
+	cors := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(http.StatusOK)
+	})
 
 	r.Handle(
 		"/",
@@ -66,8 +65,9 @@ func main() {
 	r.Handle(
 		"/trails",
 		Gorilla.MethodHandler{
-			"GET":  util.ContentType(h.GetTrails, "application/hal+json"),
-			"POST": middleware.AuthMiddleware(util.ContentType(h.CreateTrail, "application/hal+json"), jwtKey, db),
+			"GET":     util.ContentType(h.GetTrails, "application/hal+json"),
+			"POST":    middleware.AuthMiddleware(util.ContentType(h.CreateTrail, "application/hal+json"), jwtKey, db),
+			"OPTIONS": cors,
 		}).
 		Name("trails")
 	r.Handle(
@@ -79,19 +79,22 @@ func main() {
 	r.Handle(
 		"/auth",
 		Gorilla.MethodHandler{
-			"POST": util.ContentType(h.Auth, "application/hal+json"),
+			"POST":    util.ContentType(h.Auth, "application/hal+json"),
+			"OPTIONS": cors,
 		}).
 		Name("Auth")
 	r.Handle(
 		"/auth/refresh",
 		Gorilla.MethodHandler{
-			"POST": util.ContentType(h.AuthRefresh, "application/hal+json"),
+			"POST":    util.ContentType(h.AuthRefresh, "application/hal+json"),
+			"OPTIONS": cors,
 		}).
 		Name("AuthRefresh")
 	r.Handle(
 		"/auth/register",
 		Gorilla.MethodHandler{
-			"POST": util.ContentType(h.Register, "application/hal+json"),
+			"POST":    util.ContentType(h.Register, "application/hal+json"),
+			"OPTIONS": cors,
 		}).
 		Name("Register")
 
@@ -102,5 +105,5 @@ func main() {
 			net.JoinHostPort(host, port),
 			Gorilla.LoggingHandler(
 				os.Stdout,
-				cors(r))))
+				r)))
 }
